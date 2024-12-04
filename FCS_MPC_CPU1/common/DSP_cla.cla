@@ -1,0 +1,154 @@
+/*
+ * This file contain the tasks executed in the CLA
+ * There are 8 tasks declared, but just the task 1 is used, with higher priority.
+ *
+*/
+
+#include <DSP_setup_cla.h>
+#include "F28x_Project.h"
+#include "F2837xD_Cla_defines.h"
+#include "F2837xD_cla.h"
+#include "stdint.h"
+//#include "AFD_setup_gpios.h"
+
+__interrupt void Cla1Task1 ( void ){
+
+
+#ifdef CPU1
+
+    GpioDataRegs.GPBTOGGLE.bit.GPIO48 = 1;
+
+    // Clear the ADC and EPWM interrupt flag so the next SOC can occur
+    EPwm1Regs.ETCLR.bit.INT = 1;
+//    EPwm4Regs.ETCLR.bit.INT = 1;
+    AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1; //make sure INT1 flag is cleared
+
+    if(1 == AdcaRegs.ADCINTOVF.bit.ADCINT1){
+        AdcaRegs.ADCINTOVFCLR.bit.ADCINT1 = 1; //clear INT1 overflow flag
+        AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1; //clear INT1 flag
+    }
+
+#endif
+
+
+// ADD THE STUFF HERE, USE THE GPIOS TO DEBUG EXECUTION TIME
+
+
+#ifdef CPU1
+
+    iaconv = AdcaResultRegs.ADCRESULT1 - OFFSET_CA + OFFSET_CHA1;
+    ibconv = AdcaResultRegs.ADCRESULT2 - OFFSET_CA + OFFSET_CHA2;
+//    icconv = AdcaResultRegs.ADCRESULT3 - OFFSET_CA + OFFSET_CHA3;
+
+//    iagrid = AdcaResultRegs.ADCRESULT3 - OFFSET_CA + OFFSET_CH04;
+//    ibgrid = AdcaResultRegs.ADCRESULT4 - OFFSET_CA + OFFSET_CH05;
+//    icgrid = AdcaResultRegs.ADCRESULT5 - OFFSET_CA + OFFSET_CH06;
+
+    vabgrid = AdcaResultRegs.ADCRESULT3 - OFFSET_CA + OFFSET_CHA4;
+    vbcgrid = AdcaResultRegs.ADCRESULT4 - OFFSET_CA + OFFSET_CHA5;
+
+//    vcconv = AdcbResultRegs.ADCRESULT0 - OFFSET_CA + OFFSET_CHB0;
+//
+//    vabgrid = AdcbResultRegs.ADCRESULT1 - OFFSET_CA + OFFSET_CHB1;
+//    vbcgrid = AdcbResultRegs.ADCRESULT2 - OFFSET_CA + OFFSET_CHB2;
+
+//    vcc = AdcbResultRegs.ADCRESULT3 - OFFSET_CA + OFFSET_CH12;
+
+
+    iaconv = iaconv * ESCALA_1000; //ganho_corrente_AC;
+    ibconv = ibconv * ESCALA_1000;//ganho_corrente_AC;
+//    icconv = icconv * ganho_corrente_AC;
+    icconv = -iaconv - ibconv;
+
+//    iagrid = iagrid * ganho_corrente_AC;
+//    ibgrid = ibgrid * ganho_corrente_AC;
+//    icgrid = icgrid * ganho_corrente_AC;
+
+//    vaconv = vaconv * ganho_tensao_AC * 1.02;
+//    vbconv = vbconv * ganho_tensao_AC;
+//    vcconv = vcconv * ganho_tensao_AC;
+
+    vabgrid = vabgrid * ESCALA_1000;
+    vbcgrid = vbcgrid * ESCALA_1000;
+    vcagrid = - vabgrid - vbcgrid;
+
+//    vcc = vcc * ganho_tensao_CC;
+
+#endif
+
+#ifdef CPU2
+
+    GpioDataRegs.GPBTOGGLE.bit.GPIO49 = 1;
+
+    iaconv = AdcbResultRegs.ADCRESULT3 - OFFSET_CA + OFFSET_CHB3;
+    ibconv = AdcbResultRegs.ADCRESULT4 - OFFSET_CA + OFFSET_CHB4;
+
+    //    icconv = AdcbResultRegs.ADCRESULT5 - OFFSET_CA + OFFSET_CH03;
+
+//    iagrid = AdcaResultRegs.ADCRESULT3 - OFFSET_CA + OFFSET_CH04;
+//    ibgrid = AdcaResultRegs.ADCRESULT4 - OFFSET_CA + OFFSET_CH05;
+//    icgrid = AdcaResultRegs.ADCRESULT5 - OFFSET_CA + OFFSET_CH06;
+
+    vaconv = AdcbResultRegs.ADCRESULT5 - OFFSET_CA + OFFSET_CHB5;
+    vbconv = AdcdResultRegs.ADCRESULT0 - OFFSET_CA + OFFSET_CHD0;
+    vcconv = AdcdResultRegs.ADCRESULT1 - OFFSET_CA + OFFSET_CHD1;
+
+    vabgrid = AdccResultRegs.ADCRESULT14 - OFFSET_CA + OFFSET_CHC14;
+    vbcgrid = AdccResultRegs.ADCRESULT15 - OFFSET_CA + OFFSET_CHC15;
+
+//    vcc = AdcbResultRegs.ADCRESULT3 - OFFSET_CA + OFFSET_CH12;
+
+
+    iaconv = iaconv * ganho_corrente_AC;
+    ibconv = ibconv * ganho_corrente_AC;
+//    icconv = icconv * ganho_corrente_AC;
+    icconv = -iaconv - ibconv;
+
+//    iagrid = iagrid * ganho_corrente_AC;
+//    ibgrid = ibgrid * ganho_corrente_AC;
+//    icgrid = icgrid * ganho_corrente_AC;
+
+    vaconv = vaconv * ganho_tensao_AC * 1.02;
+    vbconv = vbconv * ganho_tensao_AC;
+    vcconv = vcconv * ganho_tensao_AC;
+
+    vabgrid = vabgrid * ganho_tensao_AC;
+    ibconv = vbcgrid * ganho_tensao_AC;
+    vcagrid = - vabgrid - vbcgrid;
+
+
+#endif
+
+    //    vcc = vcc * ganho_tensao_CC;
+    vcc = 800;
+
+}
+
+__interrupt void Cla1Task2 ( void ){
+
+}
+
+__interrupt void Cla1Task3 ( void ){
+
+}
+
+__interrupt void Cla1Task4 ( void ){
+
+}
+
+__interrupt void Cla1Task5 ( void ){
+
+}
+
+__interrupt void Cla1Task6 ( void ){
+
+}
+
+__interrupt void Cla1Task7 ( void ){
+
+}
+
+__interrupt void Cla1Task8 ( void ){
+
+}
+// End of file
