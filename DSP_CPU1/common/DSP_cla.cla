@@ -1,0 +1,81 @@
+/*
+ * This file contain the tasks executed in the CLA
+ * There are 8 tasks declared, but just the task 1 is used, with higher priority.
+ *
+*/
+
+#include <DSP_setup_cla.h>
+#include "F28x_Project.h"
+#include "F2837xD_Cla_defines.h"
+#include "F2837xD_cla.h"
+#include "stdint.h"
+//#include "AFD_setup_gpios.h"
+
+__interrupt void Cla1Task1 ( void ){
+
+
+#ifdef CPU1
+
+    GpioDataRegs.GPBTOGGLE.bit.GPIO61 = 1;
+
+    // Clear the ADC and EPWM interrupt flag so the next SOC can occur
+    EPwm1Regs.ETCLR.bit.INT = 1;
+    AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1; //make sure INT1 flag is cleared
+
+    if(1 == AdcaRegs.ADCINTOVF.bit.ADCINT1){
+        AdcaRegs.ADCINTOVFCLR.bit.ADCINT1 = 1; //clear INT1 overflow flag
+        AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1; //clear INT1 flag
+    }
+
+#endif
+
+#ifdef CPU2
+
+    GpioDataRegs.GPBTOGGLE.bit.GPIO63 = 1;
+
+#endif
+
+// ADD THE STUFF HERE, USE THE GPIOS TO DEBUG EXECUTION TIME
+
+#ifdef CPU1
+
+    GpioDataRegs.GPBTOGGLE.bit.GPIO61 = 1;
+
+#endif
+
+#ifdef CPU2
+
+    GpioDataRegs.GPBTOGGLE.bit.GPIO63 = 1;
+
+#endif
+
+}
+
+__interrupt void Cla1Task2 ( void ){
+
+}
+
+__interrupt void Cla1Task3 ( void ){
+
+}
+
+__interrupt void Cla1Task4 ( void ){
+
+}
+
+__interrupt void Cla1Task5 ( void ){
+
+}
+
+__interrupt void Cla1Task6 ( void ){
+
+}
+
+__interrupt void Cla1Task7 ( void ){
+
+}
+
+__interrupt void Cla1Task8 ( void ){
+
+}
+// End of file
